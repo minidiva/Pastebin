@@ -1,12 +1,14 @@
 package handlers
 
 import (
+	"context"
+	"encoding/json"
 	"net/http"
-	"pastebin/internal/entity"
+	"time"
 )
 
 type PasteService interface {
-	CreatePaste(paste entity.Paste) error
+	CreatePaste(ctx context.Context, text string, ttl time.Duration) error
 }
 
 type PasteHandler struct {
@@ -31,12 +33,41 @@ func (h *PasteHandler) CheckHealth(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(`{"status":"healthy"}`))
 }
 
-func (h PasteHandler) CreatePaste(w http.ResponseWriter, r *http.Request) error {
+// DONE:
+// Принимает POST-запрос!! от клиента с текстом пасты
+// Валидирует (не пустой)
+// Передаёт текст дальше на слой сервиса
 
-	//
+type CreatePasteRequest struct {
+	Text string        `json:"text"`
+	TTL  time.Duration `json:"ttl"`
+}
 
-	//err := h.service.CreatePaste()
+func (h *PasteHandler) CreatePaste(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
 
-	return nil
+	var req CreatePasteRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
+	if req.Text == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// TODO: работа с контекстом
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+
+	if err := h.service.CreatePaste(ctx, req.Text, req.TTL); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
 }

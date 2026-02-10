@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"pastebin/internal/db"
 	"pastebin/internal/handlers"
 	"pastebin/internal/repo"
 	"pastebin/internal/service"
@@ -11,7 +12,12 @@ import (
 
 func main() {
 
-	r := repo.NewRepo()
+	db, err := db.SetupDB()
+	if err != nil {
+		log.Fatalf("error connect to DB: %v", err)
+	}
+
+	r := repo.NewPasteRepo(db)
 
 	s := service.NewPasteService(r)
 
@@ -19,8 +25,10 @@ func main() {
 
 	http.HandleFunc("/health", PasteHandler.CheckHealth)
 
+	http.HandleFunc("/upload", PasteHandler.CreatePaste)
+
 	fmt.Println("Starting server on localhost:8081...")
-	if err := http.ListenAndServe(":8081", nil); err != nil {
+	if err = http.ListenAndServe(":8081", nil); err != nil {
 		log.Fatalf("error starting server... %v", err)
 	}
 }
