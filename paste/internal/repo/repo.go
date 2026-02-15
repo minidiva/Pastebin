@@ -19,14 +19,13 @@ func NewPasteRepo(db *sql.DB) *PasteRepo {
 
 func (r *PasteRepo) CreatePaste(ctx context.Context, paste entity.Paste) error {
 	query := `
-		INSERT INTO pastes (link, expires_at, owner_id)
-		VALUES ($1, $2, $3);
+		INSERT INTO pastes (key, expires_at)
+		VALUES ($1, $2);
 	`
 
 	_, err := r.db.ExecContext(ctx, query,
-		paste.Link,
+		paste.Key,
 		paste.ExpiresAt,
-		paste.OwnerID,
 	)
 
 	if err != nil {

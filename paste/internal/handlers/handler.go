@@ -39,8 +39,8 @@ func (h *PasteHandler) CheckHealth(w http.ResponseWriter, r *http.Request) {
 // Передаёт текст дальше на слой сервиса
 
 type CreatePasteRequest struct {
-	Text string        `json:"text"`
-	TTL  time.Duration `json:"ttl"`
+	Text string `json:"text"`
+	TTL  string `json:"ttl"`
 }
 
 func (h *PasteHandler) CreatePaste(w http.ResponseWriter, r *http.Request) {
@@ -55,6 +55,12 @@ func (h *PasteHandler) CreatePaste(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	duration, err := time.ParseDuration(req.TTL)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+	}
+
 	if req.Text == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -64,7 +70,7 @@ func (h *PasteHandler) CreatePaste(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
 
-	if err := h.service.CreatePaste(ctx, req.Text, req.TTL); err != nil {
+	if err := h.service.CreatePaste(ctx, req.Text, duration); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
