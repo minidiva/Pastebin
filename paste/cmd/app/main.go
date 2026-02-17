@@ -43,7 +43,7 @@ func main() {
 	}
 
 	client := s3.NewFromConfig(awsCfg, func(o *s3.Options) {
-		o.EndpointResolver = s3.EndpointResolverFromURL(cfg.Endpoint) // https://storage.yandexcloud.net
+		o.EndpointResolver = s3.EndpointResolverFromURL(cfg.Endpoint) // https://storage.yandexcloud.kz
 		o.UsePathStyle = true                                         // обязательно для Yandex S3
 	})
 
@@ -58,6 +58,8 @@ func main() {
 	http.HandleFunc("/health", PasteHandler.CheckHealth)
 
 	http.HandleFunc("/upload", PasteHandler.CreatePaste)
+
+	http.HandleFunc("/download", PasteHandler.GetPaste)
 
 	fmt.Println("Starting server on localhost:8081...")
 	if err = http.ListenAndServe(":8081", nil); err != nil {

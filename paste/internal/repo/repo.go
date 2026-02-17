@@ -35,11 +35,28 @@ func (r *PasteRepo) CreatePaste(ctx context.Context, paste entity.Paste) error {
 	return nil
 }
 
-//
-// type Paste struct {
-// 	ID        int
-// 	Link      string
-// 	CreatedAt time.Time
-// 	ExpiresAt time.Time
-// 	OwnerID   int // foreign key к userID
-// }
+func (r *PasteRepo) GetPaste(ctx context.Context, key string) (*entity.Paste, error) {
+	query := `
+		SELECT key, expires_at
+		FROM pastes 
+		WHERE key = $1;
+	`
+
+	row := r.db.QueryRowContext(ctx, query, key)
+
+	var paste entity.Paste
+
+	err := row.Scan(
+		&paste.Key,
+		&paste.ExpiresAt,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, err
+		}
+		return nil, err
+	}
+
+	return &paste, nil
+}
