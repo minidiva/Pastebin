@@ -43,8 +43,8 @@ func main() {
 	}
 
 	client := s3.NewFromConfig(awsCfg, func(o *s3.Options) {
-		o.EndpointResolver = s3.EndpointResolverFromURL(cfg.Endpoint) // https://storage.yandexcloud.kz
-		o.UsePathStyle = true                                         // обязательно для Yandex S3
+		o.EndpointResolver = s3.EndpointResolverFromURL(cfg.Endpoint)
+		o.UsePathStyle = true
 	})
 
 	storage := storage.NewS3Storage(client, cfg.Bucket)

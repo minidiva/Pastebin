@@ -98,7 +98,7 @@ func (h *PasteHandler) GetPaste(w http.ResponseWriter, r *http.Request) {
 	keyStr := r.URL.Query().Get("key")
 	if keyStr == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, "missing key")
+		fmt.Fprint(w, "Missing key")
 		return
 	}
 
@@ -117,9 +117,11 @@ func (h *PasteHandler) GetPaste(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case errors.Is(err, service.ErrPasteNotFound):
 			w.WriteHeader(http.StatusNotFound)
+			fmt.Fprint(w, "Paste Not Found!")
 
 		case errors.Is(err, service.ErrPasteExpired):
 			w.WriteHeader(http.StatusGone)
+			fmt.Fprint(w, "Paste Expired!")
 
 		default:
 			log.Printf("internal error: %v", err)

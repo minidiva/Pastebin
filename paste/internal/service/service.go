@@ -48,7 +48,7 @@ func generateKey() (string, error) {
 	if _, err := rand.Read(b); err != nil {
 		return "", err
 	}
-	return hex.EncodeToString(b) + ".txt", nil
+	return hex.EncodeToString(b), nil
 }
 func (p PasteService) CreatePaste(
 	ctx context.Context,
@@ -101,7 +101,7 @@ func (s *PasteService) GetPaste(ctx context.Context, key string) (string, error)
 
 	data, err := s.storage.Download(ctx, paste.Key)
 	if err != nil {
-		return "", fmt.Errorf("storage download: %w", err)
+		return "", fmt.Errorf("Error storage download: %w", err)
 	}
 
 	return string(data), nil
